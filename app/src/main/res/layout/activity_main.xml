@@ -101,11 +101,17 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="rg_screenshot,rg_watermark" />
+
     <RadioGroup
         android:id="@+id/rg_screenshot"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -145,7 +151,51 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/title_screenshot"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/rg_screenshot"
+        app:layout_constraintTop_toBottomOf="@+id/barrier" />
+
+    <RadioGroup
+        android:id="@+id/rg_watermark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@+id/rg_screenshot"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/rb_watermark_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/content_watermark_left"
+            android:textColor="@android:color/white" />
+
+        <RadioButton
+            android:id="@+id/rb_watermark_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/content_watermark_right"
+            android:textColor="@android:color/white" />
+
+    </RadioGroup>
+
+    <EditText
+        android:id="@+id/edt_watermark"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:text="@string/content_watermark_add"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="@+id/rg_watermark"
+        app:layout_constraintStart_toStartOf="@+id/rg_watermark"
+        app:layout_constraintTop_toBottomOf="@+id/rg_watermark" />
+
+    <Button
+        android:id="@+id/btn_watermark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_watermark_add"
+        app:layout_constraintStart_toStartOf="@+id/rg_watermark"
+        app:layout_constraintTop_toBottomOf="@+id/barrier" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

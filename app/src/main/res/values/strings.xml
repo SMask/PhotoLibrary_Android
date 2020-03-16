@@ -7,7 +7,13 @@
     <string name="title_view_group_2">ViewGroup_2</string>
     <string name="title_view_group_3">ViewGroup_3</string>
 
+    <string name="content_save_bitmap_result">Bitmap保存成功，路径：%1$s</string>
+
     <string name="title_screenshot">截图</string>
-    <string name="content_screenshot_result">截图成功，保存路径：%1$s</string>
+
+    <string name="content_watermark_left">添加水印左</string>
+    <string name="content_watermark_right">添加水印右</string>
+    <string name="title_watermark_add">添加水印</string>
+    <string name="content_watermark_add">\@水印内容</string>
 
 </resources>
