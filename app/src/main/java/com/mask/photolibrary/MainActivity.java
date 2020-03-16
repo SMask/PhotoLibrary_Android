@@ -11,10 +11,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.huantansheng.easyphotos.EasyPhotos;
+import com.huantansheng.easyphotos.callback.SelectCallback;
+import com.huantansheng.easyphotos.models.album.entity.Photo;
 import com.mask.photo.interfaces.SaveBitmapCallback;
 import com.mask.photo.utils.BitmapUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup rg_watermark;
     private EditText edt_watermark;
     private Button btn_watermark;
+    private Button btn_puzzle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         rg_watermark = findViewById(R.id.rg_watermark);
         edt_watermark = findViewById(R.id.edt_watermark);
         btn_watermark = findViewById(R.id.btn_watermark);
+        btn_puzzle = findViewById(R.id.btn_puzzle);
     }
 
     private void initData() {
@@ -64,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 doWatermark();
+            }
+        });
+        btn_puzzle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doPuzzle();
             }
         });
     }
@@ -91,6 +103,21 @@ public class MainActivity extends AppCompatActivity {
         String filePrefix = getPrefix() + "_水印";
 
         saveBitmapToFile(bitmap, filePrefix);
+    }
+
+    /**
+     * 拼接图片
+     */
+    private void doPuzzle() {
+        EasyPhotos.createAlbum(this, true, GlideEngine.getInstance())
+                .setFileProviderAuthority(getPackageName() + ".FileProvider")
+                .setCount(22)
+                .start(new SelectCallback() {
+                    @Override
+                    public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+
+                    }
+                });
     }
 
     /**

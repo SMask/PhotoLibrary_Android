@@ -16,4 +16,6 @@
     <string name="title_watermark_add">添加水印</string>
     <string name="content_watermark_add">\@水印内容</string>
 
+    <string name="title_puzzle">拼接图片</string>
+
 </resources>

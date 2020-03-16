@@ -3,12 +3,12 @@
     package="com.mask.photolibrary">
 
     <application
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,6 +16,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Android7.0适配 -->
+        <!-- Uri异常(裁剪等Uri.fromFile方法) -->
+        <!-- authorities：app的包名.fileProvider
+             grantUriPermissions：必须是true，表示授予 URI 临时访问权限
+             exported：必须为false，为true则会报安全异常 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
+        <!-- Android7.0适配 -->
+
     </application>
 
 </manifest>
