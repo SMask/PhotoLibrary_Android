@@ -8,5 +8,6 @@
     <string name="title_view_group_3">ViewGroup_3</string>
 
     <string name="title_screenshot">截图</string>
+    <string name="content_screenshot_result">截图成功，保存路径：%1$s</string>
 
 </resources>

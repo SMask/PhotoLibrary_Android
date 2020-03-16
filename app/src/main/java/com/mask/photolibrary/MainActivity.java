@@ -1,11 +1,17 @@
 package com.mask.photolibrary;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioGroup;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mask.photo.interfaces.SaveBitmapCallback;
+import com.mask.photo.utils.BitmapUtils;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,22 +58,43 @@ public class MainActivity extends AppCompatActivity {
      */
     private void doScreenshot() {
         View view;
+        String filePrefix;
         switch (rg_screenshot.getCheckedRadioButtonId()) {
             case R.id.rb_view_root:
                 view = layout_root;
+                filePrefix = "ViewRoot";
                 break;
             default:
             case R.id.rb_view_group_1:
                 view = layout_group_1;
+                filePrefix = "ViewGroup1";
                 break;
             case R.id.rb_view_group_2:
                 view = layout_group_2;
+                filePrefix = "ViewGroup2";
                 break;
             case R.id.rb_view_group_3:
                 view = layout_group_3;
+                filePrefix = "ViewGroup3";
                 break;
         }
 
+        BitmapUtils.saveBitmapToFile(this, BitmapUtils.getBitmap(view), filePrefix, new SaveBitmapCallback() {
+            @Override
+            public void onSuccess(File file) {
+                super.onSuccess(file);
 
+                LogUtil.i("onSuccess: " + file.getAbsolutePath());
+
+                Toast.makeText(getApplication(), getString(R.string.content_screenshot_result, file.getAbsolutePath()), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFail(Exception e) {
+                super.onFail(e);
+
+                e.printStackTrace();
+            }
+        });
     }
 }

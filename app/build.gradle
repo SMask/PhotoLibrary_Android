@@ -26,6 +26,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':Photo')
     implementation "androidx.appcompat:appcompat:$var.AppCompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$var.ConstraintLayoutVersion"
 }
