@@ -1,0 +1,12 @@
+<resources>
+
+    <string name="app_name">PhotoLibrary_Android</string>
+
+    <string name="title_view_root">ViewRoot</string>
+    <string name="title_view_group_1">ViewGroup_1</string>
+    <string name="title_view_group_2">ViewGroup_2</string>
+    <string name="title_view_group_3">ViewGroup_3</string>
+
+    <string name="title_screenshot">截图</string>
+
+</resources>
