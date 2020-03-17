@@ -12,5 +12,6 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.exifinterface:exifinterface:$var.ExifInterfaceVersion"
     implementation "top.zibin:Luban:$var.LubanVersion"
 }
