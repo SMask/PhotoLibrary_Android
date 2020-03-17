@@ -12,5 +12,5 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:$var.AppCompatVersion"
+    implementation "top.zibin:Luban:$var.LubanVersion"
 }

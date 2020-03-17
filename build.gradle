@@ -19,6 +19,7 @@ buildscript {
                 // Dependencies Others
                 EasyPhotoVersion       : "3.0.4",
                 GlideVersion           : "4.9.0",
+                LubanVersion           : "1.1.8",
         ]
     }
 

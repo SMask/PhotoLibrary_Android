@@ -15,9 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.huantansheng.easyphotos.EasyPhotos;
 import com.huantansheng.easyphotos.callback.SelectCallback;
 import com.huantansheng.easyphotos.models.album.entity.Photo;
+import com.mask.photo.PhotoCompress;
+import com.mask.photo.interfaces.CompressCallback;
 import com.mask.photo.interfaces.PuzzleCallback;
 import com.mask.photo.interfaces.SaveBitmapCallback;
 import com.mask.photo.utils.BitmapUtils;
+import com.mask.photo.utils.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText edt_watermark;
     private Button btn_watermark;
     private Button btn_puzzle;
+    private Button btn_compress;
+
+    private String authority;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +62,11 @@ public class MainActivity extends AppCompatActivity {
         edt_watermark = findViewById(R.id.edt_watermark);
         btn_watermark = findViewById(R.id.btn_watermark);
         btn_puzzle = findViewById(R.id.btn_puzzle);
+        btn_compress = findViewById(R.id.btn_compress);
     }
 
     private void initData() {
-
+        authority = getPackageName() + ".FileProvider";
     }
 
     private void initListener() {
@@ -79,6 +86,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 doPuzzle();
+            }
+        });
+        btn_compress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doCompress();
             }
         });
     }
@@ -112,13 +125,19 @@ public class MainActivity extends AppCompatActivity {
      * 拼接图片
      */
     private void doPuzzle() {
-//        String dir = "Photo";
-//        File dirFile = new File(getExternalCacheDir(), dir);
-//        List<File> fileList = Arrays.asList(dirFile.listFiles());
+//        List<File> fileList = new ArrayList<>();
+//        File dirFile = FileUtils.getCachePhotoDir(this);
+//        for (File file : dirFile.listFiles()) {
+//            if (file.isFile()) {
+//                fileList.add(file);
+//            }
+//        }
 //        BitmapUtils.puzzleFile(fileList, new PuzzleCallback() {
 //            @Override
 //            public void onSuccess(Bitmap bitmap) {
 //                super.onSuccess(bitmap);
+//
+//                LogUtil.i("Puzzle onSuccess");
 //
 //                saveBitmapToFile(bitmap, "Puzzle");
 //            }
@@ -127,12 +146,14 @@ public class MainActivity extends AppCompatActivity {
 //            public void onFail(Exception e) {
 //                super.onFail(e);
 //
+//                LogUtil.e("Puzzle onFail");
+//
 //                e.printStackTrace();
 //            }
 //        });
 
         EasyPhotos.createAlbum(this, true, GlideEngine.getInstance())
-                .setFileProviderAuthority(getPackageName() + ".FileProvider")
+                .setFileProviderAuthority(authority)
                 .setCount(22)
                 .start(new SelectCallback() {
                     @Override
@@ -149,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onSuccess(Bitmap bitmap) {
                                 super.onSuccess(bitmap);
 
+                                LogUtil.i("Puzzle onSuccess");
+
                                 saveBitmapToFile(bitmap, "Puzzle");
                             }
 
@@ -156,11 +179,101 @@ public class MainActivity extends AppCompatActivity {
                             public void onFail(Exception e) {
                                 super.onFail(e);
 
+                                LogUtil.e("Puzzle onFail");
+
                                 e.printStackTrace();
                             }
                         });
                     }
                 });
+    }
+
+    /**
+     * 压缩图片
+     */
+    private void doCompress() {
+        List<File> fileList = new ArrayList<>();
+        File dirFile = FileUtils.getCachePhotoDir(this);
+        for (File file : dirFile.listFiles()) {
+            if (file.isFile()) {
+                fileList.add(file);
+            }
+        }
+        PhotoCompress.with(MainActivity.this)
+                .sourcePath(fileList)
+                .minSize(300)
+                .start(new CompressCallback() {
+                    @Override
+                    public void onStart() {
+                        super.onStart();
+
+                        LogUtil.i("Compress onStart");
+                    }
+
+                    @Override
+                    public void onSuccess(File file) {
+                        super.onSuccess(file);
+
+                        LogUtil.i("Compress onSuccess: " + file.getAbsolutePath());
+
+                        Toast.makeText(getApplication(), getString(R.string.content_compress_result, file.getAbsolutePath()), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onFail(Throwable e) {
+                        super.onFail(e);
+
+                        LogUtil.e("Compress onError");
+
+                        e.printStackTrace();
+                    }
+                });
+
+        // Uri目前有Bug，拿不到真实的文件路径
+//        EasyPhotos.createAlbum(this, true, GlideEngine.getInstance())
+//                .setFileProviderAuthority(authority)
+//                .setCount(22)
+//                .start(new SelectCallback() {
+//                    @Override
+//                    public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+//                        List<Uri> uriList = new ArrayList<>();
+//                        for (Photo photo : photos) {
+//                            if (photo == null) {
+//                                continue;
+//                            }
+//                            uriList.add(photo.uri);
+//                        }
+//                        PhotoCompress.with(MainActivity.this)
+//                                .sourcePath(uriList)
+//                                .minSize(300)
+//                                .start(new CompressCallback() {
+//                                    @Override
+//                                    public void onStart() {
+//                                        super.onStart();
+//
+//                                        LogUtil.i("Compress onStart");
+//                                    }
+//
+//                                    @Override
+//                                    public void onSuccess(File file) {
+//                                        super.onSuccess(file);
+//
+//                                        LogUtil.i("Compress onSuccess: " + file.getAbsolutePath());
+//
+//                                        Toast.makeText(getApplication(), getString(R.string.content_compress_result, file.getAbsolutePath()), Toast.LENGTH_LONG).show();
+//                                    }
+//
+//                                    @Override
+//                                    public void onFail(Throwable e) {
+//                                        super.onFail(e);
+//
+//                                        LogUtil.e("Compress onError");
+//
+//                                        e.printStackTrace();
+//                                    }
+//                                });
+//                    }
+//                });
     }
 
     /**
@@ -225,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(File file) {
                 super.onSuccess(file);
 
-                LogUtil.i("onSuccess: " + file.getAbsolutePath());
+                LogUtil.i("Save onSuccess: " + file.getAbsolutePath());
 
                 Toast.makeText(getApplication(), getString(R.string.content_save_bitmap_result, file.getAbsolutePath()), Toast.LENGTH_LONG).show();
             }
@@ -233,6 +346,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFail(Exception e) {
                 super.onFail(e);
+
+                LogUtil.e("Save onError");
 
                 e.printStackTrace();
             }

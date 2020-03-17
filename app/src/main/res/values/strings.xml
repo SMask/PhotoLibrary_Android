@@ -18,4 +18,7 @@
 
     <string name="title_puzzle">拼接图片</string>
 
+    <string name="title_compress">压缩图片</string>
+    <string name="content_compress_result">压缩成功，路径：%1$s</string>
+
 </resources>

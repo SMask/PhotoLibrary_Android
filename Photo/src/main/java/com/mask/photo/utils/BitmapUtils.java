@@ -83,8 +83,7 @@ public class BitmapUtils {
             @Override
             public void run() {
                 // 创建保存路径
-                String dir = "Photo";
-                File dirFile = new File(activity.getExternalCacheDir(), dir);
+                File dirFile = FileUtils.getCachePhotoDir(activity);
                 boolean mkdirs = dirFile.mkdirs();
 
                 FileOutputStream fos = null;
