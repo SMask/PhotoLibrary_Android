@@ -2,6 +2,7 @@ package com.mask.photolibrary;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,11 +15,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.huantansheng.easyphotos.EasyPhotos;
 import com.huantansheng.easyphotos.callback.SelectCallback;
 import com.huantansheng.easyphotos.models.album.entity.Photo;
+import com.mask.photo.interfaces.PuzzleCallback;
 import com.mask.photo.interfaces.SaveBitmapCallback;
 import com.mask.photo.utils.BitmapUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -109,13 +112,53 @@ public class MainActivity extends AppCompatActivity {
      * 拼接图片
      */
     private void doPuzzle() {
+//        String dir = "Photo";
+//        File dirFile = new File(getExternalCacheDir(), dir);
+//        List<File> fileList = Arrays.asList(dirFile.listFiles());
+//        BitmapUtils.puzzleFile(fileList, new PuzzleCallback() {
+//            @Override
+//            public void onSuccess(Bitmap bitmap) {
+//                super.onSuccess(bitmap);
+//
+//                saveBitmapToFile(bitmap, "Puzzle");
+//            }
+//
+//            @Override
+//            public void onFail(Exception e) {
+//                super.onFail(e);
+//
+//                e.printStackTrace();
+//            }
+//        });
+
         EasyPhotos.createAlbum(this, true, GlideEngine.getInstance())
                 .setFileProviderAuthority(getPackageName() + ".FileProvider")
                 .setCount(22)
                 .start(new SelectCallback() {
                     @Override
                     public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                        List<Uri> uriList = new ArrayList<>();
+                        for (Photo photo : photos) {
+                            if (photo == null) {
+                                continue;
+                            }
+                            uriList.add(photo.uri);
+                        }
+                        BitmapUtils.puzzleUri(MainActivity.this, uriList, new PuzzleCallback() {
+                            @Override
+                            public void onSuccess(Bitmap bitmap) {
+                                super.onSuccess(bitmap);
 
+                                saveBitmapToFile(bitmap, "Puzzle");
+                            }
+
+                            @Override
+                            public void onFail(Exception e) {
+                                super.onFail(e);
+
+                                e.printStackTrace();
+                            }
+                        });
                     }
                 });
     }

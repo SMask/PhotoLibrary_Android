@@ -2,24 +2,43 @@ package com.mask.photo.utils;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.mask.photo.interfaces.PuzzleCallback;
 import com.mask.photo.interfaces.SaveBitmapCallback;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Bitmap Utils
  * Created by lishilin on 2020/03/16
  */
 public class BitmapUtils {
+
+    /**
+     * 回收Bitmap
+     *
+     * @param bitmap Bitmap
+     */
+    public static void recycle(Bitmap bitmap) {
+        if (bitmap != null) {
+            if (!bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+            bitmap = null;
+        }
+    }
 
     /**
      * 获取View Bitmap
@@ -55,6 +74,11 @@ public class BitmapUtils {
      * @param callback   回调
      */
     public static void saveBitmapToFile(final Activity activity, final Bitmap bitmap, final String filePrefix, final SaveBitmapCallback callback) {
+        if (bitmap == null) {
+            callback.onFail(new NullPointerException("Bitmap不能为null"));
+            return;
+        }
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -89,8 +113,7 @@ public class BitmapUtils {
                     if (fos != null) {
                         try {
                             fos.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } catch (Exception ignored) {
                         }
                     }
                 }
@@ -112,6 +135,10 @@ public class BitmapUtils {
      * @param isLeft     是否在左边
      */
     public static void addWatermark(Bitmap bitmap, float baseWidth, float baseHeight, String text, int textColor, float textSize, float offsetX, float offsetY, boolean isLeft) {
+        if (bitmap == null) {
+            return;
+        }
+
         float width = bitmap.getWidth();
         float height = bitmap.getHeight();
         if (width <= 0 || height <= 0) {
@@ -152,6 +179,104 @@ public class BitmapUtils {
         }
         float textY = height - offsetY - rect.height() - rect.top;
         canvas.drawText(text, textX, textY, textPaint);
+    }
+
+    /**
+     * 拼接图片
+     *
+     * @param fileList fileList
+     * @param callback 回调
+     */
+    public static void puzzleFile(final List<File> fileList, final PuzzleCallback callback) {
+        if (fileList == null || fileList.isEmpty()) {
+            return;
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Bitmap> bitmapList = new ArrayList<>();
+                for (File file : fileList) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                    if (bitmap == null) {
+                        continue;
+                    }
+                    bitmapList.add(bitmap);
+                }
+
+                callback.onSuccess(puzzleBitmap(bitmapList));
+            }
+        }).start();
+    }
+
+    /**
+     * 拼接图片
+     *
+     * @param activity activity
+     * @param uriList  uriList
+     * @param callback callback
+     */
+    public static void puzzleUri(final Activity activity, final List<Uri> uriList, final PuzzleCallback callback) {
+        if (uriList == null || uriList.isEmpty()) {
+            return;
+        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Bitmap> bitmapList = new ArrayList<>();
+                for (Uri uri : uriList) {
+                    Bitmap bitmap = null;
+                    try (InputStream inputStream = activity.getContentResolver().openInputStream(uri)) {
+                        bitmap = BitmapFactory.decodeStream(inputStream);
+                    } catch (Exception ignored) {
+                    }
+                    if (bitmap == null) {
+                        continue;
+                    }
+                    bitmapList.add(bitmap);
+                }
+
+                callback.onSuccess(puzzleBitmap(bitmapList));
+            }
+        }).start();
+    }
+
+    /**
+     * 拼接图片
+     *
+     * @param bitmapList bitmapList
+     */
+    public static Bitmap puzzleBitmap(List<Bitmap> bitmapList) {
+        if (bitmapList == null || bitmapList.isEmpty()) {
+            return null;
+        }
+
+        // 计算画布宽高
+        int width = 0;
+        int height = 0;
+        for (Bitmap bitmap : bitmapList) {
+            width = Math.max(width, bitmap.getWidth());
+            height += bitmap.getHeight();
+        }
+
+        // 创建画布
+        Bitmap resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(resultBitmap);
+
+        // 拼接图片
+        int top = 0;
+        for (Bitmap bitmap : bitmapList) {
+            int bitmapWidth = bitmap.getWidth();
+            int bitmapHeight = bitmap.getHeight();
+
+            float left = (width - bitmapWidth) / 2.0f;
+            canvas.drawBitmap(bitmap, left, top, null);
+
+            top += bitmapHeight;
+        }
+
+        return resultBitmap;
     }
 
 }
