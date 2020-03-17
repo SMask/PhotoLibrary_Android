@@ -6,7 +6,7 @@ import java.io.File;
  * 压缩回调
  * Created by lishilin on 2020/03/17
  */
-public class CompressCallback {
+public abstract class CompressCallback {
 
     /**
      * 开始
