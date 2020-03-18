@@ -45,7 +45,7 @@ public class BitmapUtils {
     }
 
     /**
-     * 获取View Bitmap
+     * 获取Bitmap
      *
      * @param view view
      * @return Bitmap
@@ -67,6 +67,111 @@ public class BitmapUtils {
         view.draw(canvas);
 
         return bitmap;
+    }
+
+    /**
+     * 获取Bitmap
+     *
+     * @param file file
+     * @return Bitmap
+     */
+    public static Bitmap getBitmap(File file) {
+        if (file == null) {
+            return null;
+        }
+
+        // 获取Bitmap
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+
+        // 获取ExifInterface
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(file);
+        } catch (Exception ignored) {
+        }
+        if (exif == null) {
+            return bitmap;
+        }
+
+        return adjustOrientation(bitmap, exif);
+    }
+
+    /**
+     * 获取Bitmap
+     *
+     * @param context context
+     * @param uri     uri
+     * @return Bitmap
+     */
+    public static Bitmap getBitmap(Context context, Uri uri) {
+        if (uri == null) {
+            return null;
+        }
+
+        // 获取Bitmap
+        Bitmap bitmap = null;
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+            bitmap = BitmapFactory.decodeStream(inputStream);
+        } catch (Exception ignored) {
+        }
+
+        // 获取ExifInterface
+        ExifInterface exif = null;
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
+            if (inputStream != null) {
+                exif = new ExifInterface(inputStream);
+            }
+        } catch (Exception ignored) {
+        }
+        if (exif == null) {
+            return bitmap;
+        }
+
+        return adjustOrientation(bitmap, exif);
+    }
+
+    /**
+     * 校准Bitmap方向
+     *
+     * @param bitmap bitmap
+     * @param exif   ExifInterface
+     * @return Bitmap
+     */
+    public static Bitmap adjustOrientation(Bitmap bitmap, ExifInterface exif) {
+        if (exif == null) {
+            return bitmap;
+        }
+
+        // 计算旋转角度
+        int angle;
+        int ori = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+        switch (ori) {
+            default:
+                angle = 0;
+                break;
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                angle = 90;
+                break;
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                angle = 180;
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                angle = 270;
+                break;
+        }
+        if (angle == 0) {
+            return bitmap;
+        }
+
+        // 旋转图片
+        Matrix matrix = new Matrix();
+        matrix.setRotate(angle);
+        Bitmap result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        recycle(bitmap);
+        return result;
     }
 
     /**
@@ -175,101 +280,6 @@ public class BitmapUtils {
     }
 
     /**
-     * 旋转Bitmap
-     *
-     * @param bitmap bitmap
-     * @param file   file
-     * @return Bitmap
-     */
-    public static Bitmap adjustOrientation(Bitmap bitmap, File file) {
-        if (file == null) {
-            return bitmap;
-        }
-
-        ExifInterface exif = null;
-        try {
-            exif = new ExifInterface(file);
-        } catch (Exception ignored) {
-        }
-        if (exif == null) {
-            return bitmap;
-        }
-
-        return adjustOrientation(bitmap, exif);
-    }
-
-    /**
-     * 旋转Bitmap
-     *
-     * @param context context
-     * @param bitmap  bitmap
-     * @param uri     uri
-     * @return Bitmap
-     */
-    public static Bitmap adjustOrientation(Context context, Bitmap bitmap, Uri uri) {
-        if (uri == null) {
-            return bitmap;
-        }
-
-        ExifInterface exif = null;
-        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
-            if (inputStream != null) {
-                exif = new ExifInterface(inputStream);
-            }
-        } catch (Exception ignored) {
-        }
-        if (exif == null) {
-            return bitmap;
-        }
-
-        return adjustOrientation(bitmap, exif);
-    }
-
-    /**
-     * 旋转Bitmap
-     *
-     * @param bitmap bitmap
-     * @param exif   ExifInterface
-     * @return Bitmap
-     */
-    public static Bitmap adjustOrientation(Bitmap bitmap, ExifInterface exif) {
-        if (exif == null) {
-            return bitmap;
-        }
-
-        // 计算旋转角度
-        int angle;
-        int ori = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-        switch (ori) {
-            default:
-                angle = 0;
-                break;
-            case ExifInterface.ORIENTATION_TRANSPOSE:
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                angle = 90;
-                break;
-            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                angle = 180;
-                break;
-            case ExifInterface.ORIENTATION_TRANSVERSE:
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                angle = 270;
-                break;
-        }
-        if (angle == 0) {
-            return bitmap;
-        }
-
-        // 旋转图片
-        Matrix matrix = new Matrix();
-        matrix.setRotate(angle);
-        Bitmap result = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        recycle(bitmap);
-        return result;
-    }
-
-    /**
      * 拼接图片
      *
      * @param fileList fileList
@@ -285,11 +295,10 @@ public class BitmapUtils {
             public void run() {
                 List<Bitmap> bitmapList = new ArrayList<>();
                 for (File file : fileList) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                    Bitmap bitmap = getBitmap(file);
                     if (bitmap == null) {
                         continue;
                     }
-                    bitmap = adjustOrientation(bitmap, file);
                     bitmapList.add(bitmap);
                 }
 
@@ -315,15 +324,10 @@ public class BitmapUtils {
             public void run() {
                 List<Bitmap> bitmapList = new ArrayList<>();
                 for (Uri uri : uriList) {
-                    Bitmap bitmap = null;
-                    try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
-                        bitmap = BitmapFactory.decodeStream(inputStream);
-                    } catch (Exception ignored) {
-                    }
+                    Bitmap bitmap = getBitmap(context, uri);
                     if (bitmap == null) {
                         continue;
                     }
-                    bitmap = adjustOrientation(context, bitmap, uri);
                     bitmapList.add(bitmap);
                 }
 
@@ -333,7 +337,7 @@ public class BitmapUtils {
     }
 
     /**
-     * 拼接图片
+     * 拼接Bitmap
      *
      * @param bitmapList bitmapList
      */
