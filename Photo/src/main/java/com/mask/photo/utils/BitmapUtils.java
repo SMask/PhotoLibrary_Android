@@ -196,6 +196,22 @@ public class BitmapUtils {
         // 创建保存文件
         final File outFile = new File(dirFile, FileUtils.getDateName(filePrefix) + ".png");
 
+        saveBitmapToFile(bitmap, outFile, callback);
+    }
+
+    /**
+     * 保存Bitmap到文件
+     *
+     * @param bitmap   bitmap
+     * @param outFile  outFile
+     * @param callback 回调
+     */
+    public static void saveBitmapToFile(Bitmap bitmap, File outFile, SaveBitmapCallback callback) {
+        if (bitmap == null) {
+            callback.onFail(new NullPointerException("Bitmap不能为null"));
+            return;
+        }
+
         // 保存文件
         try (FileOutputStream fos = new FileOutputStream(outFile)) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
