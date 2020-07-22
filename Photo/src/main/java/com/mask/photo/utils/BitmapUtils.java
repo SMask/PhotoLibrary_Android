@@ -87,7 +87,8 @@ public class BitmapUtils {
         ExifInterface exif = null;
         try {
             exif = new ExifInterface(file);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if (exif == null) {
             return bitmap;
@@ -112,7 +113,8 @@ public class BitmapUtils {
         Bitmap bitmap = null;
         try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
             bitmap = BitmapFactory.decodeStream(inputStream);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         // 获取ExifInterface
@@ -121,7 +123,8 @@ public class BitmapUtils {
             if (inputStream != null) {
                 exif = new ExifInterface(inputStream);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if (exif == null) {
             return bitmap;
@@ -188,35 +191,21 @@ public class BitmapUtils {
             return;
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // 创建保存路径
-                File dirFile = FileUtils.getCachePhotoDir(activity);
-                boolean mkdirs = dirFile.mkdirs();
-                // 创建保存文件
-                final File outFile = new File(dirFile, FileUtils.getDateName(filePrefix) + ".png");
+        // 创建保存路径
+        File dirFile = FileUtils.getCachePhotoDir(activity);
+        boolean mkdirs = dirFile.mkdirs();
+        // 创建保存文件
+        final File outFile = new File(dirFile, FileUtils.getDateName(filePrefix) + ".png");
 
-                // 保存文件
-                try (FileOutputStream fos = new FileOutputStream(outFile)) {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    fos.flush();
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onSuccess(outFile);
-                        }
-                    });
-                } catch (final Exception e) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            callback.onFail(e);
-                        }
-                    });
-                }
-            }
-        }).start();
+        // 保存文件
+        try (FileOutputStream fos = new FileOutputStream(outFile)) {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            callback.onSuccess(outFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.onFail(e);
+        }
     }
 
     /**
@@ -290,21 +279,16 @@ public class BitmapUtils {
             return;
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<Bitmap> bitmapList = new ArrayList<>();
-                for (File file : fileList) {
-                    Bitmap bitmap = getBitmap(file);
-                    if (bitmap == null) {
-                        continue;
-                    }
-                    bitmapList.add(bitmap);
-                }
-
-                callback.onSuccess(puzzleBitmap(bitmapList));
+        List<Bitmap> bitmapList = new ArrayList<>();
+        for (File file : fileList) {
+            Bitmap bitmap = getBitmap(file);
+            if (bitmap == null) {
+                continue;
             }
-        }).start();
+            bitmapList.add(bitmap);
+        }
+
+        callback.onSuccess(puzzleBitmap(bitmapList));
     }
 
     /**
@@ -319,21 +303,16 @@ public class BitmapUtils {
             return;
         }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<Bitmap> bitmapList = new ArrayList<>();
-                for (Uri uri : uriList) {
-                    Bitmap bitmap = getBitmap(context, uri);
-                    if (bitmap == null) {
-                        continue;
-                    }
-                    bitmapList.add(bitmap);
-                }
-
-                callback.onSuccess(puzzleBitmap(bitmapList));
+        List<Bitmap> bitmapList = new ArrayList<>();
+        for (Uri uri : uriList) {
+            Bitmap bitmap = getBitmap(context, uri);
+            if (bitmap == null) {
+                continue;
             }
-        }).start();
+            bitmapList.add(bitmap);
+        }
+
+        callback.onSuccess(puzzleBitmap(bitmapList));
     }
 
     /**
