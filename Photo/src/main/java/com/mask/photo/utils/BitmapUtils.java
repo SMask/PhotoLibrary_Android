@@ -1,6 +1,5 @@
 package com.mask.photo.utils;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -180,19 +179,19 @@ public class BitmapUtils {
     /**
      * 保存Bitmap到文件
      *
-     * @param activity   activity
+     * @param context    context
      * @param bitmap     bitmap
      * @param filePrefix 文件前缀名(文件最终名称格式为：前缀名+自动生成的唯一数字字符+.png)
      * @param callback   回调
      */
-    public static void saveBitmapToFile(final Activity activity, final Bitmap bitmap, final String filePrefix, final SaveBitmapCallback callback) {
+    public static void saveBitmapToFile(Context context, Bitmap bitmap, String filePrefix, SaveBitmapCallback callback) {
         if (bitmap == null) {
             callback.onFail(new NullPointerException("Bitmap不能为null"));
             return;
         }
 
         // 创建保存路径
-        File dirFile = FileUtils.getCachePhotoDir(activity);
+        File dirFile = FileUtils.getCachePhotoDir(context);
         boolean mkdirs = dirFile.mkdirs();
         // 创建保存文件
         final File outFile = new File(dirFile, FileUtils.getDateName(filePrefix) + ".png");
@@ -274,7 +273,7 @@ public class BitmapUtils {
      * @param fileList fileList
      * @param callback 回调
      */
-    public static void puzzleFile(final List<File> fileList, final PuzzleCallback callback) {
+    public static void puzzleFile(List<File> fileList, PuzzleCallback callback) {
         if (fileList == null || fileList.isEmpty()) {
             return;
         }
@@ -298,7 +297,7 @@ public class BitmapUtils {
      * @param uriList  uriList
      * @param callback callback
      */
-    public static void puzzleUri(final Context context, final List<Uri> uriList, final PuzzleCallback callback) {
+    public static void puzzleUri(Context context, List<Uri> uriList, PuzzleCallback callback) {
         if (uriList == null || uriList.isEmpty()) {
             return;
         }
